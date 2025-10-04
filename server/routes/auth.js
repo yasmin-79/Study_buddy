@@ -1,7 +1,7 @@
 import express from 'express';
 import authMiddleware from "../middleware/auth.js";
 import pool from '../db.js';
-import bcrypt from 'bcrypt';
+import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
