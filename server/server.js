@@ -16,17 +16,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Ensure uploads folder exists BEFORE serving it
+// Ensure uploads folder exists
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
-// Serve uploaded files statically
 app.use('/uploads', express.static(uploadDir));
 
-// Routes
+// API routes
 app.use('/auth', authRouter);
 app.use('/upload', uploadRouter);
 app.use('/files', filesRouter);
+
+// Serve React build
+const clientBuildPath = path.join(__dirname, 'client/build');
+if (fs.existsSync(clientBuildPath)) {
+  app.use(express.static(clientBuildPath));
+
+  // For any other route, serve index.html
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+} else {
+  console.warn('React build folder not found. Run "npm run build" inside client folder.');
+}
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
