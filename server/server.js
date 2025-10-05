@@ -27,7 +27,7 @@ app.use('/upload', uploadRouter);
 app.use('/files', filesRouter);
 
 // Serve React build
-const clientBuildPath = path.join(__dirname, 'client/build');
+const clientBuildPath = path.join(__dirname, '../client/build'); // ✅ one level up
 if (fs.existsSync(clientBuildPath)) {
   app.use(express.static(clientBuildPath));
 
