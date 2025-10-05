@@ -4,22 +4,35 @@ import BACKEND_URL from "../config";
 
 function Files() {
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true); // Loading state
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    axios
-      .get(`${BACKEND_URL}/files`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setFiles(res.data))
-      .catch((err) => console.error("Error fetching files:", err));
+    const fetchFiles = async () => {
+      setLoading(true); // start loading
+      try {
+        const res = await axios.get(`${BACKEND_URL}/files`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFiles(res.data);
+      } catch (err) {
+        console.error("Error fetching files:", err);
+      } finally {
+        setLoading(false); // stop loading
+      }
+    };
+
+    fetchFiles();
   }, [token]);
 
   return (
     <div className="bg-white shadow rounded p-6">
+      {loading && <p className="text-blue-500 font-semibold">Loading files... ⏳</p>}
+
       <h2 className="text-lg font-semibold mb-4">All Files</h2>
+
       <div className="grid grid-cols-3 gap-4">
-        {files.length > 0 ? (
+        {!loading && files.length > 0 ? (
           files.map((f) => (
             <div key={f.id} className="p-3 border rounded shadow-sm">
               <p className="font-medium">{f.title}</p>
@@ -43,7 +56,7 @@ function Files() {
             </div>
           ))
         ) : (
-          <p>No files uploaded yet.</p>
+          !loading && <p>No files uploaded yet.</p>
         )}
       </div>
     </div>

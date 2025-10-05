@@ -1,19 +1,20 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import React, { useState } from "react";
-import BACKEND_URL from "../config"; // ✅ import this
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import BACKEND_URL from "../config";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
   const [form, setForm] = useState({ email: "", password: "" });
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post(`${BACKEND_URL}/auth/login`, form); // ✅ use live URL
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const res = await axios.post(`${BACKEND_URL}/auth/login`, form);
+      login(res.data.user, res.data.token); // ✅ updates context
       alert("Login successful");
-      navigate("/dashboard");
+      navigate("/dashboard"); // ✅ now instantly redirects
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Error while logging in");

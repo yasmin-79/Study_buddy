@@ -24,31 +24,38 @@ function Upload() {
     fetchFiles();
   }, []);
 
-  const handleUpload = async (e) => {
-    e.preventDefault();
-    if (!file) return alert("Please select a file");
+  const [loading, setLoading] = useState(false);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("subject", subject);
+const handleUpload = async (e) => {
+  e.preventDefault();
+  if (!file) return alert("Please select a file");
 
-    try {
-      const res = await axios.post(`${BACKEND_URL}/upload`, formData, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-      });
+  setLoading(true);
 
-      alert(res.data.message);
-      window.dispatchEvent(new Event("fileUploaded")); // trigger dashboard update
-      setFile(null);
-      setTitle("");
-      setSubject("");
-      fetchFiles();
-    } catch (err) {
-      console.error("Upload error:", err);
-      alert(err.response?.data?.message || "Upload failed");
-    }
-  };
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("title", title);
+  formData.append("subject", subject);
+
+  try {
+    const res = await axios.post(`${BACKEND_URL}/upload`, formData, {
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+    });
+
+    alert(res.data.message);
+    window.dispatchEvent(new Event("fileUploaded")); // trigger dashboard update
+    setFile(null);
+    setTitle("");
+    setSubject("");
+    fetchFiles();
+  } catch (err) {
+    console.error("Upload error:", err);
+    alert(err.response?.data?.message || "Upload failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this file?")) return;
@@ -67,7 +74,9 @@ function Upload() {
   };
 
   return (
-    <div className="bg-white shadow rounded p-6">
+<div className="bg-white shadow rounded p-6">
+      {loading && <p className="text-blue-500 font-semibold">Uploading... Please wait ⏳</p>}
+
       <h2 className="text-lg font-semibold mb-4">Upload PDF</h2>
       <form onSubmit={handleUpload} className="space-y-4">
         <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files[0])} />
@@ -88,7 +97,7 @@ function Upload() {
           <option value="JavaScript">JavaScript</option>
           <option value="Machine Learning">Machine Learning</option>
         </select>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Upload</button>
+        <button type    ="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Upload</button>
       </form>
 
       <h3 className="mt-6 font-semibold">Uploaded Files</h3>
