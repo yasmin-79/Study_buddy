@@ -1,27 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import BACKEND_URL from "../config"; // ✅ import this
 
 function Dashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-
   const [studyStats, setStudyStats] = useState([]);
 
-  // Fetch files and calculate subject-wise progress
   const fetchProgress = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/files", {
+      const res = await axios.get(`${BACKEND_URL}/files`, {  // ✅ updated
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Group files by subject
       const grouped = res.data.reduce((acc, f) => {
         acc[f.subject] = acc[f.subject] ? acc[f.subject] + 1 : 1;
         return acc;
       }, {});
 
-      // Calculate progress (target 5 files per subject)
       const stats = Object.keys(grouped).map((subject) => ({
         subject,
         progress: Math.min((grouped[subject] / 5) * 100, 100),
@@ -35,8 +32,6 @@ function Dashboard() {
 
   useEffect(() => {
     fetchProgress();
-
-    // Listen for uploads to update progress
     window.addEventListener("fileUploaded", fetchProgress);
     return () => window.removeEventListener("fileUploaded", fetchProgress);
   }, []);
@@ -49,14 +44,12 @@ function Dashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold text-slate-800">
           Welcome to <span className="text-blue-600">StudyBuddy</span>
         </h1>
       </div>
 
-      {/* Study Progress */}
       <div className="bg-white shadow-lg rounded-2xl border border-slate-200 p-6">
         <h2 className="text-lg font-semibold text-slate-700 mb-4">Study Progress</h2>
         <div className="space-y-4">
@@ -81,7 +74,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Links */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         {cards.map((item) => (
           <div

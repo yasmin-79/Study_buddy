@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import BACKEND_URL from "../config";
 
 function Profile() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -10,13 +11,15 @@ function Profile() {
   const handleChangePassword = async () => {
     if (!password) return alert("Enter a new password");
     try {
-      await axios.post("http://localhost:5000/auth/change-password", 
+      await axios.post(
+        `${BACKEND_URL}/auth/change-password`,
         { password },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert("Password updated successfully");
       setPassword("");
     } catch (err) {
+      console.error("Password update error:", err);
       alert("Failed to update password");
     }
   };

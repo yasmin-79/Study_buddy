@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
+import BACKEND_URL from "../config"; // ✅ import the backend URL
 
 function Register() {
   const navigate = useNavigate();
@@ -8,9 +9,9 @@ function Register() {
 
   const handleRegister = async () => {
     try {
-      await axios.post("http://localhost:5000/auth/register", form);
+      await axios.post(`${BACKEND_URL}/auth/register`, form); // ✅ use BACKEND_URL
       alert("Registration successful");
-      navigate("/login"); // go to login after successful registration
+      navigate("/login");
     } catch (err) {
       console.error(err);
       if (err.response?.data?.message === "Email already registered") {
@@ -50,7 +51,6 @@ function Register() {
           Register
         </button>
 
-        {/* Login Button */}
         <div className="text-center mt-4">
           <p className="text-sm">
             Already have an account?{" "}

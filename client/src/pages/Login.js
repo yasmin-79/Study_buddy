@@ -1,25 +1,24 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
+import BACKEND_URL from "../config"; // ✅ import this
 
 function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
 
   const handleLogin = async () => {
-  try {
-    const res = await axios.post("http://localhost:5000/auth/login", form);
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user)); // save user too
-    alert("Login successful");
-    navigate("/dashboard"); // navigate to protected route
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || "Error while logging in");
-  }
-};
-
-
+    try {
+      const res = await axios.post(`${BACKEND_URL}/auth/login`, form); // ✅ use live URL
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      alert("Login successful");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Error while logging in");
+    }
+  };
 
   return (
     <div className="flex items-center justify-center h-screen bg-gradient-to-br from-cyan-400/20 to-purple-600/20">
