@@ -1,43 +1,48 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import Login from "./pages/Login";
+import React, { useContext } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/Register";
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/upload";
-import Files from "./pages/files";
-import Subjects from "./pages/subjects";
-import Profile from "./pages/profile";
-import Layout from "./components/layout";
+import { AuthProvider, AuthContext } from "./context/AuthContext";
 
-function App() {
-  const token = localStorage.getItem("token");
+function AppRoutes() {
+  const { token } = useContext(AuthContext);
 
   return (
-    <AuthProvider>
     <Routes>
-      {/* Public routes */}
-      <Route path="/" element={<Register />} />
-      <Route path="/login" element={<Login />} />
+      {/* Redirect logged-in users to dashboard */}
+      <Route
+        path="/"
+        element={token ? <Navigate to="/dashboard" /> : <Register />}
+      />
+      <Route
+        path="/login"
+        element={token ? <Navigate to="/dashboard" /> : <Login />}
+      />
 
-      {/* Protected routes nested under /dashboard */}
+      {/* Protected routes */}
       <Route
         path="/dashboard"
-        element={token ? <Layout /> : <Navigate to="/login" replace />}
-      >
-        {/* Dashboard home */}
-        <Route index element={<Dashboard />} />
+        element={token ? <Dashboard /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/upload"
+        element={token ? <Upload /> : <Navigate to="/login" />}
+      />
 
-        {/* Nested routes */}
-        <Route path="upload" element={<Upload />} />
-        <Route path="files" element={<Files />} />
-        <Route path="subjects" element={<Subjects />} />
-        <Route path="profile" element={<Profile />} />
-      </Route>
-
-      {/* Catch-all redirect */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* If route doesn't exist */}
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
     </AuthProvider>
   );
 }

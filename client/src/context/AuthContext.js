@@ -3,28 +3,38 @@ import React, { createContext, useState, useEffect } from "react";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || null
+  );
 
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
-
-  const login = (userData, tokenData) => {
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", tokenData);
-    setUser(userData);
-    setToken(tokenData);
+  // ✅ Update token in localStorage instantly when login/logout
+  const login = (newToken, newUser) => {
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("user", JSON.stringify(newUser));
+    setToken(newToken);
+    setUser(newUser);
   };
 
   const logout = () => {
-    localStorage.clear();
-    setUser(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setToken(null);
+    setUser(null);
   };
 
+  // ✅ Sync token changes automatically across tabs (optional)
+  useEffect(() => {
+    const syncAuth = () => {
+      setToken(localStorage.getItem("token"));
+      setUser(JSON.parse(localStorage.getItem("user")));
+    };
+    window.addEventListener("storage", syncAuth);
+    return () => window.removeEventListener("storage", syncAuth);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -13,25 +13,32 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors());
+
+// ✅ Improved CORS setup (fixes upload issue on other devices)
+app.use(cors({
+  origin: "*", // or "https://your-frontend-domain.com"
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+// ✅ Parse JSON
 app.use(express.json());
 
-// Ensure uploads folder exists
+// ✅ Ensure uploads folder exists
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 app.use('/uploads', express.static(uploadDir));
 
-// API routes
+// ✅ API routes
 app.use('/auth', authRouter);
 app.use('/upload', uploadRouter);
 app.use('/files', filesRouter);
 
-// Serve React build
-const clientBuildPath = path.join(__dirname, '../client/build'); // ✅ one level up
+// ✅ Serve React build (if it exists)
+const clientBuildPath = path.join(__dirname, '../client/build');
 if (fs.existsSync(clientBuildPath)) {
   app.use(express.static(clientBuildPath));
 
-  // For any other route, serve index.html
   app.get('*', (req, res) => {
     res.sendFile(path.join(clientBuildPath, 'index.html'));
   });

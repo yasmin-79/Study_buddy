@@ -1,21 +1,34 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import React, { useState } from "react";
-import BACKEND_URL from "../config"; // ✅ import the backend URL
+import React, { useState, useContext } from "react";
+import BACKEND_URL from "../config";
+import { AuthContext } from "../context/AuthContext";
 
 function Register() {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext); // ✅ get login from context
   const [form, setForm] = useState({ name: "", email: "", password: "" });
 
   const handleRegister = async () => {
     try {
-      await axios.post(`${BACKEND_URL}/auth/register`, form); // ✅ use BACKEND_URL
-      alert("Registration successful");
-      navigate("/login");
+      // Step 1: Register user
+      const res = await axios.post(`${BACKEND_URL}/auth/register`, form);
+      alert("Registration successful 🎉");
+
+      // Step 2: Immediately log in automatically
+      const loginRes = await axios.post(`${BACKEND_URL}/auth/login`, {
+        email: form.email,
+        password: form.password,
+      });
+
+      login(loginRes.data.user, loginRes.data.token); // ✅ set user + token
+      navigate("/dashboard"); // ✅ instantly redirect to dashboard
+
     } catch (err) {
       console.error(err);
       if (err.response?.data?.message === "Email already registered") {
-        alert("Email already registered. Please login.");
+        alert("Email already registered. Redirecting to login...");
+        navigate("/login");
       } else {
         alert("Error while registering");
       }
